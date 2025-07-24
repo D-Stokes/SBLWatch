@@ -2,17 +2,21 @@ name: Daily YouTube Data Pull
 
 on:
   schedule:
-    - cron: '0 9 * * *'  # Runs every day at 9:00 UTC
-  workflow_dispatch:     # Allows manual trigger
+    - cron: '0 9 * * *'  # Runs every day at 09:00 UTC
+  workflow_dispatch:      # Allows manual trigger
 
 jobs:
   fetch_data:
     runs-on: ubuntu-latest
+
     env:
       YOUTUBE_API_KEY: ${{ secrets.YOUTUBE_API_KEY }}
+
     steps:
       - name: Checkout repo
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: true  # Required for pushing back to the repo
 
       - name: Set up Python
         uses: actions/setup-python@v4
@@ -29,10 +33,15 @@ jobs:
 
       - name: Set date variable
         id: vars
-        run: echo "DATE=$(date +'%Y-%m-%d')" >> $GITHUB_OUTPUT
+        run: echo "DATE=$(date +'%Y-%m-%d')" >> "$GITHUB_OUTPUT"
 
-      - name: Upload CSV artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: video_data_${{ steps.vars.outputs.DATE }}
-          path: output/video_data*.csv
+      - name: Configure Git
+        run: |
+          git config user.name "github-actions"
+          git config user.email "github-actions@github.com"
+
+      - name: Commit and push CSV
+        run: |
+          git add output/*.csv
+          git commit -m "Add daily video data - ${{ steps.vars.outputs.DATE }}" || echo "No changes to commit"
+          git push
