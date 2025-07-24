@@ -2,7 +2,9 @@ import os
 from dotenv import load_dotenv
 import requests
 import pandas as pd
+import isodate
 from functions import get_channel_videos, get_video_stats
+from video_ids import VIDEO_ID
 
 """
 This will be a daily datapull from scotts bass lessons to pull video metadata with
@@ -51,7 +53,7 @@ df['publish_date'] = pd.to_datetime(df['publish_date'])
 print(df.head())
 
 
-video_id = "nmVf1jHl2f8"
+video_id = VIDEO_ID[0]
 
 url = f"https://www.googleapis.com/youtube/v3/videos?part=snippet,statistics,contentDetails&id={video_id}&key={api_key}"
 
@@ -68,7 +70,7 @@ if data['items']:
     comments = ( stats.get('commentCount'))
     isoduration = ( details.get('duration'))
     duration = isodate.parse_duration(str(isoduration))
+    print(views, likes, comments, duration)
 else:
     print("Video not found or API key error.")
 
-    print(views, likes, comments, duration)
