@@ -26,3 +26,13 @@ jobs:
 
       - name: Run script
         run: python main.py
+
+      - name: Set date variable
+        id: vars
+        run: echo "DATE=$(date +'%Y-%m-%d')" >> $GITHUB_OUTPUT
+
+      - name: Upload CSV artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: video_data_${{ steps.vars.outputs.DATE }}
+          path: output/video_data*.csv
